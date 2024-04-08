@@ -8,14 +8,15 @@ cloudinary.v2.config({
 });
 
 export const uploadImageToCloudinary = async (imagePath) => {
+  if (!imagePath) return null;
   try {
-    const uploadedImage = await cloudinary.v2.uploader.upload(imagePath, {
+    const uploadedImageResponse = await cloudinary.v2.uploader.upload(imagePath, {
       folder: 'VideoTube'
     })
     fs.unlinkSync(imagePath)
-    return uploadedImage
+    return uploadedImageResponse
   } catch (error) {
     fs.unlinkSync(imagePath)
-    console.log(error.message);
+    return null
   }
 }
