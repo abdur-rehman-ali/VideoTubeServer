@@ -1,5 +1,5 @@
-import cloudinary from 'cloudinary'
-import fs from 'fs'
+import cloudinary from "cloudinary";
+import fs from "fs";
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,13 +10,16 @@ cloudinary.v2.config({
 export const uploadImageToCloudinary = async (imagePath) => {
   if (!imagePath) return null;
   try {
-    const uploadedImageResponse = await cloudinary.v2.uploader.upload(imagePath, {
-      folder: 'VideoTube'
-    })
-    fs.unlinkSync(imagePath)
-    return uploadedImageResponse
+    const uploadedImageResponse = await cloudinary.v2.uploader.upload(
+      imagePath,
+      {
+        folder: "VideoTube"
+      }
+    );
+    fs.unlinkSync(imagePath);
+    return uploadedImageResponse;
   } catch (error) {
-    fs.unlinkSync(imagePath)
-    return null
+    fs.unlinkSync(imagePath);
+    return null;
   }
-}
+};
