@@ -8,6 +8,10 @@ export const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password, firstName, lastName } = req.body;
   const { profileImage, coverImage } = req.files;
 
+  if (!userName || !email || !password) {
+    throw new APIError(422, "All fields are required");
+  }
+
   const user = await User.findOne({
     $or: [{ email }, { userName }]
   });
