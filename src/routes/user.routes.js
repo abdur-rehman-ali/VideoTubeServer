@@ -1,9 +1,15 @@
 import { Router } from "express";
 import { upload } from "../utils/multer.js";
-import { registerUser } from "../controllers/user.controller.js";
+import {
+  currentUser,
+  loginUser,
+  registerUser
+} from "../controllers/user.controller.js";
+import { authenticate } from "../middlewares/authenticate.middleware.js";
 
 const router = Router();
 
+// Public routes
 router.route("/register").post(
   upload.fields([
     { name: "profileImage", maxCount: 1 },
@@ -11,5 +17,9 @@ router.route("/register").post(
   ]),
   registerUser
 );
+router.route("/login").post(upload.none(), loginUser);
+
+// Private routes
+router.route("/current-user").get(authenticate, currentUser);
 
 export default router;

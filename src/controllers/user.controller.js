@@ -1,3 +1,4 @@
+import { generateAccessAndRefreshToken } from "../helpers/user.helper.js";
 import { User } from "../models/user.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
@@ -47,3 +48,49 @@ export const registerUser = asyncHandler(async (req, res) => {
     .status(201)
     .json(new APIResponse(201, createdUser, "User registered sucessfully"));
 });
+
+export const loginUser = asyncHandler(async (req, res) => {
+  const { usernameOrEmail, password } = req.body;
+
+  if (!usernameOrEmail || !password) {
+    throw new APIError(422, "All fields are required");
+  }
+
+  const user = await User.findOne({
+    $or: [{ userName: usernameOrEmail }, { email: usernameOrEmail }]
+  });
+
+  if (!user) {
+    throw new APIError(422, "User not found");
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+  if (!isPasswordCorrect) {
+    throw new APIError(422, "Password is incorrect");
+  }
+
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshToken(user);
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true
+  };
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new APIResponse(
+        200,
+        { user, accessToken, refreshToken },
+        "User login successfully"
+      )
+    );
+});
+
+export const currentUser = async (req, res) => {
+  res.status(200).json(new APIResponse(200, req.user, "Current User"));
+};
