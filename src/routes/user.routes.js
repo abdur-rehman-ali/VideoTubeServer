@@ -3,7 +3,8 @@ import { upload } from "../utils/multer.js";
 import {
   currentUser,
   loginUser,
-  registerUser
+  registerUser,
+  logoutUser
 } from "../controllers/user.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 
@@ -21,5 +22,6 @@ router.route("/login").post(upload.none(), loginUser);
 
 // Private routes
 router.route("/current-user").get(authenticate, currentUser);
+router.route("/logout").post(authenticate, logoutUser);
 
 export default router;

@@ -94,3 +94,22 @@ export const loginUser = asyncHandler(async (req, res) => {
 export const currentUser = async (req, res) => {
   res.status(200).json(new APIResponse(200, req.user, "Current User"));
 };
+
+export const logoutUser = async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, {
+    $unset: {
+      refreshToken: 1
+    }
+  });
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true
+  };
+
+  res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new APIResponse(200, {}, "User logged out successfully"));
+};
