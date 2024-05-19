@@ -4,7 +4,8 @@ import {
   currentUser,
   loginUser,
   registerUser,
-  logoutUser
+  logoutUser,
+  refreshAccessToken
 } from "../controllers/user.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 
@@ -23,5 +24,6 @@ router.route("/login").post(upload.none(), loginUser);
 // Private routes
 router.route("/current-user").get(authenticate, currentUser);
 router.route("/logout").post(authenticate, logoutUser);
+router.route("/refresh-access-token").post(authenticate, refreshAccessToken);
 
 export default router;

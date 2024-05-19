@@ -4,6 +4,7 @@ import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password, firstName, lastName } = req.body;
@@ -91,11 +92,11 @@ export const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export const currentUser = async (req, res) => {
+export const currentUser = asyncHandler(async (req, res) => {
   res.status(200).json(new APIResponse(200, req.user, "Current User"));
-};
+});
 
-export const logoutUser = async (req, res) => {
+export const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user._id, {
     $unset: {
       refreshToken: 1
@@ -112,4 +113,58 @@ export const logoutUser = async (req, res) => {
     .clearCookie("accessToken", cookieOptions)
     .clearCookie("refreshToken", cookieOptions)
     .json(new APIResponse(200, {}, "User logged out successfully"));
-};
+});
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body?.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new APIError(401, "Unauthorized access");
+  }
+
+  const decodedRefreshToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET_KEY
+  );
+
+  if (!decodedRefreshToken) {
+    throw new APIError(401, "Failed to decode refresh token");
+  }
+
+  const user = await User.findById(decodedRefreshToken._id);
+
+  if (!user) {
+    throw new APIError(401, "Failed to generate user from refresh token");
+  }
+
+  if (user.refreshToken !== incomingRefreshToken) {
+    throw new APIError(
+      401,
+      "Failed to match refresh token with incoming refresh token"
+    );
+  }
+
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshToken(user);
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true
+  };
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new APIResponse(
+        200,
+        {
+          accessToken,
+          refreshToken
+        },
+        "Access token refreshed successfully"
+      )
+    );
+});
