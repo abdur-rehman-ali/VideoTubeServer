@@ -168,3 +168,52 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
       )
     );
 });
+
+/**
+ * Resets the user's password.
+ *
+ * This function handles the password reset process by:
+ * 1. Verifying that the new password and confirmation match.
+ * 2. Finding the user by their ID from the request object.
+ * 3. Checking if the provided old password is correct.
+ * 4. Updating the user's password to the new one if all checks pass.
+ *
+ * Parameters:
+ * - req.body.oldPassword (string): The user's current password.
+ * - req.body.newPassword (string): The new password to set.
+ * - req.body.newPasswordConfirmation (string): Confirmation of the new password.
+ *
+ * Errors are thrown with appropriate HTTP status codes:
+ * - 400 Bad Request: New password and confirmation do not match.
+ * - 404 Not Found: User cannot be found.
+ * - 401 Unauthorized: Incorrect old password.
+ *
+ * On success, returns a 200 OK status with a success message.
+ */
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword, newPasswordConfirmation } = req.body;
+
+  // Check if new passwords match
+  if (newPassword !== newPasswordConfirmation) {
+    throw new APIError(400, "New password and confirmation do not match");
+  }
+
+  // Find user by ID
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new APIError(404, "User not found");
+  }
+
+  // Verify old password
+  const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  if (!isOldPasswordCorrect) {
+    throw new APIError(401, "Incorrect old password");
+  }
+
+  // Update password
+  user.password = newPassword;
+  await user.save();
+
+  // Respond with success message
+  res.status(200).json(new APIResponse(200, {}, "Password reset successfully"));
+});
