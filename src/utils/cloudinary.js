@@ -13,7 +13,7 @@ export const uploadImageToCloudinary = async (imagePath) => {
     const uploadedImageResponse = await cloudinary.v2.uploader.upload(
       imagePath,
       {
-        folder: "VideoTube"
+        folder: process.env.CLOUDINARY_ASSETS_FOLDER
       }
     );
     fs.unlinkSync(imagePath);
@@ -21,5 +21,24 @@ export const uploadImageToCloudinary = async (imagePath) => {
   } catch (error) {
     fs.unlinkSync(imagePath);
     return null;
+  }
+};
+
+export const deleteImageFromCloudinary = async (imageURL) => {
+  if (!imageURL) return null;
+
+  let publicId = imageURL?.split("/")?.pop()?.split(".")[0];
+  publicId = `${process.env.CLOUDINARY_ASSETS_FOLDER}/${publicId}`;
+
+  try {
+    const result = await cloudinary.v2.uploader.destroy(publicId);
+
+    if (result.result !== "ok") {
+      throw new Error(`Failed to delete old image: ${result.result}`);
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
   }
 };

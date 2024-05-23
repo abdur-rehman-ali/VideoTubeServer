@@ -3,7 +3,10 @@ import { User } from "../models/user.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteImageFromCloudinary,
+  uploadImageToCloudinary
+} from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 export const registerUser = asyncHandler(async (req, res) => {
@@ -216,4 +219,29 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   // Respond with success message
   res.status(200).json(new APIResponse(200, {}, "Password reset successfully"));
+});
+
+export const updateProfileImage = asyncHandler(async (req, res) => {
+  const profileImagePath = req.file?.path;
+
+  const uploadedProfileImage = await uploadImageToCloudinary(profileImagePath);
+  if (!uploadedProfileImage) {
+    throw new APIError(401, "Profile image not updated");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        profileImage: uploadedProfileImage.url
+      }
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  await deleteImageFromCloudinary(req.user?.profileImage);
+
+  res
+    .status(200)
+    .json(new APIResponse(200, { user }, "Profile image updated successfully"));
 });
