@@ -7,7 +7,8 @@ import {
   logoutUser,
   refreshAccessToken,
   resetPassword,
-  updateProfileImage
+  updateProfileImage,
+  userChannelProfile
 } from "../controllers/user.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 
@@ -22,6 +23,7 @@ router.route("/register").post(
   registerUser
 );
 router.route("/login").post(upload.none(), loginUser);
+router.route("/channel/:username").get(userChannelProfile);
 
 // Private routes
 router.route("/current-user").get(authenticate, currentUser);
