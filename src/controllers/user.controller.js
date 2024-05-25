@@ -172,27 +172,6 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     );
 });
 
-/**
- * Resets the user's password.
- *
- * This function handles the password reset process by:
- * 1. Verifying that the new password and confirmation match.
- * 2. Finding the user by their ID from the request object.
- * 3. Checking if the provided old password is correct.
- * 4. Updating the user's password to the new one if all checks pass.
- *
- * Parameters:
- * - req.body.oldPassword (string): The user's current password.
- * - req.body.newPassword (string): The new password to set.
- * - req.body.newPasswordConfirmation (string): Confirmation of the new password.
- *
- * Errors are thrown with appropriate HTTP status codes:
- * - 400 Bad Request: New password and confirmation do not match.
- * - 404 Not Found: User cannot be found.
- * - 401 Unauthorized: Incorrect old password.
- *
- * On success, returns a 200 OK status with a success message.
- */
 export const resetPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword, newPasswordConfirmation } = req.body;
 
@@ -222,13 +201,16 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 export const updateProfileImage = asyncHandler(async (req, res) => {
+  // Retrieve the path of the uploaded profile image from the request
   const profileImagePath = req.file?.path;
 
+  // Upload the image to Cloudinary and get the uploaded image details
   const uploadedProfileImage = await uploadImageToCloudinary(profileImagePath);
   if (!uploadedProfileImage) {
     throw new APIError(401, "Profile image not updated");
   }
 
+  // Update the user's profile image URL in the database
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -236,11 +218,13 @@ export const updateProfileImage = asyncHandler(async (req, res) => {
         profileImage: uploadedProfileImage.url
       }
     },
-    { new: true }
-  ).select("-password -refreshToken");
+    { new: true } // Return the updated user document
+  ).select("-password -refreshToken"); // Exclude password and refresh token
 
+  // Delete the old profile image from Cloudinary if it exists
   await deleteImageFromCloudinary(req.user?.profileImage);
 
+  // Send a successful response with the updated user information
   res
     .status(200)
     .json(new APIResponse(200, { user }, "Profile image updated successfully"));
