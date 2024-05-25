@@ -6,7 +6,8 @@ import {
   registerUser,
   logoutUser,
   refreshAccessToken,
-  resetPassword
+  resetPassword,
+  updateProfileImage
 } from "../controllers/user.controller.js";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 
@@ -27,5 +28,8 @@ router.route("/current-user").get(authenticate, currentUser);
 router.route("/logout").post(authenticate, logoutUser);
 router.route("/refresh-access-token").post(authenticate, refreshAccessToken);
 router.route("/reset-password").post(authenticate, resetPassword);
+router
+  .route("/update-profile-image")
+  .post(authenticate, upload.single("profileImage"), updateProfileImage);
 
 export default router;
