@@ -229,3 +229,78 @@ export const updateProfileImage = asyncHandler(async (req, res) => {
     .status(200)
     .json(new APIResponse(200, { user }, "Profile image updated successfully"));
 });
+
+export const userChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  // Check if username is provided
+  if (!username) {
+    throw new APIError(400, "Username is required");
+  }
+
+  // Aggregation pipeline to fetch user profile and subscription details
+  let user = await User.aggregate([
+    // Match the user by username (case-insensitive)
+    {
+      $match: { userName: username.trim().toLowerCase() }
+    },
+    // Lookup subscriptions where the user is the subscriber
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "mySubscriptions"
+      }
+    },
+    // Lookup subscriptions where the user is the channel
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribedTo"
+      }
+    },
+    // Add fields for the counts of subscriptions and subscribers, and check if the current user is subscribed
+    {
+      $addFields: {
+        mySubscriptionsCount: {
+          $size: "$mySubscriptions"
+        },
+        subscribedToCount: {
+          $size: "$subscribedTo"
+        },
+        // Check if the current user is subscribed to the user's channel
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribedTo.subscriber"] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    },
+    // Project necessary fields and exclude sensitive information
+    {
+      $project: {
+        password: 0,
+        mySubscriptions: 0,
+        subscribedTo: 0,
+        refreshToken: 0
+      }
+    }
+  ]);
+
+  // If no user is found, return a 404 response
+  if (user.length === 0) {
+    return res.status(404).json(new APIResponse(404, null, "User not found!"));
+  }
+
+  // Return the user profile data in the response
+  return res
+    .status(200)
+    .json(
+      new APIResponse(200, user[0], "User Profile data fetched successfully!")
+    );
+});
