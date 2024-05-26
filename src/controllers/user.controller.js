@@ -229,3 +229,72 @@ export const updateProfileImage = asyncHandler(async (req, res) => {
     .status(200)
     .json(new APIResponse(200, { user }, "Profile image updated successfully"));
 });
+
+export const userChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username) {
+    throw new APIError(400, "Username is required");
+  }
+
+  let user = await User.aggregate([
+    {
+      $match: { userName: username.trim().toLowerCase() }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "mySubscriptions"
+      }
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribedTo"
+      }
+    },
+    {
+      $addFields: {
+        mySubscriptionsCount: {
+          $size: "$mySubscriptions"
+        },
+        subscribedToCount: {
+          $size: "$subscribedTo"
+        },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$mySubscriptions.subscriber"] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        password: 0,
+        mySubscriptions: 0,
+        subscribedTo: 0,
+        refreshToken: 0
+      }
+    }
+  ]);
+
+  if (user.length === 0) {
+    return res
+    .status(404)
+    .json(
+      new APIResponse(404, null, "User not found!")
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new APIResponse(200, user[0], "User Profile data fetched successfully!")
+    );
+});

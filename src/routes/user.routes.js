@@ -23,13 +23,13 @@ router.route("/register").post(
   registerUser
 );
 router.route("/login").post(upload.none(), loginUser);
-router.route("/channel/:username").get(userChannelProfile);
 
 // Private routes
 router.route("/current-user").get(authenticate, currentUser);
 router.route("/logout").post(authenticate, logoutUser);
 router.route("/refresh-access-token").post(authenticate, refreshAccessToken);
 router.route("/reset-password").post(authenticate, resetPassword);
+router.route("/channel/:username").get(authenticate, userChannelProfile);
 router
   .route("/update-profile-image")
   .post(authenticate, upload.single("profileImage"), updateProfileImage);
