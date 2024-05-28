@@ -3,6 +3,7 @@ import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadFileToCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
+import mongoose from "mongoose";
 
 export const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
@@ -48,4 +49,48 @@ export const uploadVideo = asyncHandler(async (req, res) => {
         "Video has been uploaded successfully"
       )
     );
+});
+
+export const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!videoId) {
+    throw new APIError(422, "Video Id is required");
+  }
+
+  const video = await Video.aggregate([
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId.createFromHexString(videoId)
+      }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "creator",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $project: {
+        creator: 0,
+        user: {
+          password: 0,
+          refreshToken: 0
+        }
+      }
+    }
+  ]);
+
+  if (video.length === 0) {
+    throw new APIError(404, "Video not found");
+  }
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, video, "Video fetched successfully"));
 });
