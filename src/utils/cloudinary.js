@@ -7,27 +7,28 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-export const uploadImageToCloudinary = async (imagePath) => {
-  if (!imagePath) return null;
+export const uploadFileToCloudinary = async (filePath) => {
+  if (!filePath) return null;
   try {
     const uploadedImageResponse = await cloudinary.v2.uploader.upload(
-      imagePath,
+      filePath,
       {
-        folder: process.env.CLOUDINARY_ASSETS_FOLDER
+        folder: process.env.CLOUDINARY_ASSETS_FOLDER,
+        resource_type: "auto"
       }
     );
-    fs.unlinkSync(imagePath);
+    fs.unlinkSync(filePath);
     return uploadedImageResponse;
   } catch (error) {
-    fs.unlinkSync(imagePath);
+    fs.unlinkSync(filePath);
     return null;
   }
 };
 
-export const deleteImageFromCloudinary = async (imageURL) => {
-  if (!imageURL) return null;
+export const deleteFileFromCloudinary = async (fileURL) => {
+  if (!fileURL) return null;
 
-  let publicId = imageURL?.split("/")?.pop()?.split(".")[0];
+  let publicId = fileURL?.split("/")?.pop()?.split(".")[0];
   publicId = `${process.env.CLOUDINARY_ASSETS_FOLDER}/${publicId}`;
 
   try {
