@@ -4,8 +4,8 @@ import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
-  deleteImageFromCloudinary,
-  uploadImageToCloudinary
+  deleteFileFromCloudinary,
+  uploadFileToCloudinary
 } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
@@ -27,11 +27,11 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   let uploadedProfileImage = "";
   if (profileImage && profileImage.length > 0 && profileImage[0].path) {
-    uploadedProfileImage = await uploadImageToCloudinary(profileImage[0].path);
+    uploadedProfileImage = await uploadFileToCloudinary(profileImage[0].path);
   }
   let uploadedCoverImage = "";
   if (coverImage && coverImage.length > 0 && coverImage[0].path) {
-    uploadedCoverImage = await uploadImageToCloudinary(coverImage[0].path);
+    uploadedCoverImage = await uploadFileToCloudinary(coverImage[0].path);
   }
 
   let createdUser = await User.create({
@@ -205,7 +205,7 @@ export const updateProfileImage = asyncHandler(async (req, res) => {
   const profileImagePath = req.file?.path;
 
   // Upload the image to Cloudinary and get the uploaded image details
-  const uploadedProfileImage = await uploadImageToCloudinary(profileImagePath);
+  const uploadedProfileImage = await uploadFileToCloudinary(profileImagePath);
   if (!uploadedProfileImage) {
     throw new APIError(401, "Profile image not updated");
   }
@@ -222,7 +222,7 @@ export const updateProfileImage = asyncHandler(async (req, res) => {
   ).select("-password -refreshToken"); // Exclude password and refresh token
 
   // Delete the old profile image from Cloudinary if it exists
-  await deleteImageFromCloudinary(req.user?.profileImage);
+  await deleteFileFromCloudinary(req.user?.profileImage);
 
   // Send a successful response with the updated user information
   res
