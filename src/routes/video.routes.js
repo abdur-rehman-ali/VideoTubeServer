@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
-import { uploadVideo } from "../controllers/video.controller.js";
+import { getVideoById, uploadVideo } from "../controllers/video.controller.js";
 import { upload } from "../utils/multer.js";
 
 const router = Router();
+
+// Public routes
+router.route("/:videoId").get(getVideoById);
 
 // Private routes
 router.route("/upload-video").post(
