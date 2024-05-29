@@ -1,9 +1,9 @@
+import mongoose from "mongoose";
+import { Video } from "../models/video.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadFileToCloudinary } from "../utils/cloudinary.js";
-import { Video } from "../models/video.model.js";
-import mongoose from "mongoose";
 
 export const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
@@ -93,4 +93,39 @@ export const getVideoById = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new APIResponse(200, video, "Video fetched successfully"));
+});
+
+export const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId, resourceType } = req.params;
+  const { title, description } = req.body;
+
+  const videoRecord = await Video.findById(videoId);
+
+  if (!videoRecord) {
+    throw new APIError(404, "Video not found");
+  }
+
+  if (!videoRecord.isOwner(req.user._id)) {
+    throw new APIError(422, "Your are not owner of this video");
+  }
+
+  if (!resourceType) {
+    if (title) videoRecord.title = title;
+    if (description) videoRecord.description = description;
+  } else if (resourceType === "title" && title) {
+    videoRecord.title = title;
+  } else if (resourceType === "description" && description) {
+    videoRecord.description = description;
+  }
+  await videoRecord.save();
+
+  return res
+    .status(200)
+    .json(
+      new APIResponse(
+        200,
+        { video: videoRecord },
+        "Record updated successfully"
+      )
+    );
 });

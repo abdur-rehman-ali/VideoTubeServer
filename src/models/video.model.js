@@ -40,4 +40,10 @@ const videoSchema = new Schema(
   }
 );
 
+// ############  Methods ############
+videoSchema.methods.isOwner = function (userID) {
+  if (!userID) return false;
+  return this.creator.equals(userID);
+};
+
 export const Video = mongoose.model("Video", videoSchema);

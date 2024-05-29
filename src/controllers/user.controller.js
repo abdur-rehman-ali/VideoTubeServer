@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { generateAccessAndRefreshToken } from "../helpers/user.helper.js";
 import { User } from "../models/user.model.js";
 import { APIError } from "../utils/APIError.js";
@@ -7,7 +8,6 @@ import {
   deleteFileFromCloudinary,
   uploadFileToCloudinary
 } from "../utils/cloudinary.js";
-import jwt from "jsonwebtoken";
 
 export const registerUser = asyncHandler(async (req, res) => {
   const { userName, email, password, firstName, lastName } = req.body;
