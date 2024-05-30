@@ -22,6 +22,8 @@ router.route("/upload-video").post(
   uploadVideo
 );
 router.route("/:videoId/update").put(authenticate, updateVideo);
-router.route("/:videoId/update/:resourceType").put(authenticate, updateVideo);
+router
+  .route("/:videoId/update/:resourceType")
+  .put(authenticate, upload.single("thumbnail"), updateVideo);
 
 export default router;

@@ -3,7 +3,10 @@ import { Video } from "../models/video.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadFileToCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadFileToCloudinary,
+  deleteFileFromCloudinary
+} from "../utils/cloudinary.js";
 
 export const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
@@ -116,6 +119,11 @@ export const updateVideo = asyncHandler(async (req, res) => {
     videoRecord.title = title;
   } else if (resourceType === "description" && description) {
     videoRecord.description = description;
+  } else if (resourceType === "thumbnail") {
+    const uploadedFile = await uploadFileToCloudinary(req.file?.path);
+    const oldFileToDelete = videoRecord.thumbnail;
+    await deleteFileFromCloudinary(oldFileToDelete);
+    videoRecord.thumbnail = uploadedFile.url;
   }
   await videoRecord.save();
 
