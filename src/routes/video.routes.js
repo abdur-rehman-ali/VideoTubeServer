@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 import {
+  deleteVideo,
   getVideoById,
   updateVideo,
   uploadVideo
@@ -25,5 +26,6 @@ router.route("/:videoId/update").put(authenticate, updateVideo);
 router
   .route("/:videoId/update/:resourceType")
   .put(authenticate, upload.single("thumbnail"), updateVideo);
+router.route("/:videoId/destroy").delete(authenticate, deleteVideo);
 
 export default router;
