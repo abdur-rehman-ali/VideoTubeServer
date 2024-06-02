@@ -153,5 +153,26 @@ export const deleteVideo = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new APIResponse(200, { }, "Video deleted successfully"));
+    .json(new APIResponse(200, {}, "Video deleted successfully"));
+});
+
+export const togglePublishVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!videoId) {
+    throw new APIError(400, "Video Id is required");
+  }
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new APIError(404, "Video not found");
+  }
+
+  video.isPublished = !video.isPublished;
+  await video.save();
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Video published toggled successfully"));
 });
