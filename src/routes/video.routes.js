@@ -3,6 +3,7 @@ import { authenticate } from "../middlewares/authenticate.middleware.js";
 import {
   deleteVideo,
   getVideoById,
+  togglePublishVideo,
   updateVideo,
   uploadVideo
 } from "../controllers/video.controller.js";
@@ -27,5 +28,8 @@ router
   .route("/:videoId/update/:resourceType")
   .put(authenticate, upload.single("thumbnail"), updateVideo);
 router.route("/:videoId/destroy").delete(authenticate, deleteVideo);
+router
+  .route("/:videoId/togglePublishVideo")
+  .put(authenticate, togglePublishVideo);
 
 export default router;
