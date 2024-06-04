@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 import {
   deleteVideo,
+  getAllVideos,
   getVideoById,
   togglePublishVideo,
   updateVideo,
@@ -12,6 +13,7 @@ import { upload } from "../utils/multer.js";
 const router = Router();
 
 // Public routes
+router.route("/all").get(getAllVideos);
 router.route("/:videoId").get(getVideoById);
 
 // Private routes
