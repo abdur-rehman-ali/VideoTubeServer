@@ -7,6 +7,36 @@ import {
   uploadFileToCloudinary,
   deleteFileFromCloudinary
 } from "../utils/cloudinary.js";
+import { parseQueryParam } from "../helpers/application.helper.js";
+
+export const getAllVideos = asyncHandler(async (req, res) => {
+  const page = parseQueryParam(req.query.page, 1);
+  const limit = parseQueryParam(req.query.limit, 10);
+  const sortBy = req.query.sortBy || "createdAt";
+  const sortType = req.query.sortType || "desc";
+
+  const sortOptions = {};
+  sortOptions[sortBy] = sortType === "asc" ? 1 : -1;
+
+  const startIndex = (page - 1) * limit;
+
+  const videos = await Video.find()
+    .sort(sortOptions)
+    .skip(startIndex)
+    .limit(limit);
+
+  res.status(200).json(
+    new APIResponse(
+      200,
+      {
+        videos,
+        count: videos.length,
+        page
+      },
+      "Videos fetched successfully!!!"
+    )
+  );
+});
 
 export const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
