@@ -20,10 +20,38 @@ export const getAllVideos = asyncHandler(async (req, res) => {
 
   const startIndex = (page - 1) * limit;
 
-  const videos = await Video.find()
-    .sort(sortOptions)
-    .skip(startIndex)
-    .limit(limit);
+  const pipeline = [
+    { $sort: sortOptions },
+    { $skip: startIndex },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: "users",
+        localField: "creator",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              password: 0,
+              refreshToken: 0,
+              watchHistory: 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $project: {
+        creator: 0
+      }
+    }
+  ];
+
+  const videos = await Video.aggregate(pipeline);
 
   res.status(200).json(
     new APIResponse(
