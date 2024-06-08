@@ -34,3 +34,25 @@ export const createPlaylist = asyncHandler(async (req, res) => {
       )
     );
 });
+
+export const getSinglePlaylistById = asyncHandler(async (req, res) => {
+  const { playlistID } = req.params;
+
+  if (!playlistID) {
+    throw new APIError(422, "Id is required");
+  }
+
+  const playlist = await Playlist.findById(playlistID)
+    .populate({
+      path: "owner",
+      select: "-password -refreshToken -watchHistory",
+    });
+
+  if (!playlist) {
+    throw new APIError(500, "Playlist not found");
+  }
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, playlist, "Playlist fetched successfully"));
+});
