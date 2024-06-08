@@ -42,11 +42,10 @@ export const getSinglePlaylistById = asyncHandler(async (req, res) => {
     throw new APIError(422, "Id is required");
   }
 
-  const playlist = await Playlist.findById(playlistID)
-    .populate({
-      path: "owner",
-      select: "-password -refreshToken -watchHistory",
-    });
+  const playlist = await Playlist.findById(playlistID).populate({
+    path: "owner",
+    select: "-password -refreshToken -watchHistory"
+  });
 
   if (!playlist) {
     throw new APIError(500, "Playlist not found");
@@ -55,4 +54,31 @@ export const getSinglePlaylistById = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new APIResponse(200, playlist, "Playlist fetched successfully"));
+});
+
+export const getAllPlaylistOfUserById = asyncHandler(async (req, res) => {
+  const { userID } = req.params;
+
+  if (!userID) {
+    throw new APIError(422, "User Id is required");
+  }
+
+  const allPlaylists = await Playlist.find({ owner: userID }).populate({
+    path: "owner",
+    select: "-password -refreshToken -watchHistory"
+  });
+
+  if (!userID) {
+    throw new APIError(500, "Playlists not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new APIResponse(
+        200,
+        allPlaylists,
+        "Playlists of user fetched successfully"
+      )
+    );
 });
