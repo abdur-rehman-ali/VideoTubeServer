@@ -2,6 +2,7 @@ import express from "express";
 import userRoutes from "./routes/user.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import videoRoutes from "./routes/video.routes.js";
+import playlistRoutes from "./routes/playlist.routes.js";
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.get("/api/v1", (_, res) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/subscriptions", subscriptionRoutes);
 app.use("/api/v1/videos", videoRoutes);
+app.use("/api/v1/playlist", playlistRoutes);
 
 export default app;
