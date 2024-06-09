@@ -116,6 +116,53 @@ export const addVideoToPlaylist = asyncHandler(async (req, res) => {
     })
     .populate("videos");
 
+  if (!playlist) {
+    throw new APIError(404, "Playlist not found");
+  }
+
+  res
+    .status(200)
+    .json(
+      new APIResponse(200, playlist, "Video added to playlist successfully")
+    );
+});
+
+export const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
+  const { playlistID } = req.params;
+  const { videoID } = req.body;
+
+  if (!playlistID) {
+    throw new APIError(422, "Playlist id is required");
+  }
+
+  if (!videoID) {
+    throw new APIError(422, "Video id is required");
+  }
+
+  const video = await Video.findById(videoID);
+  if (!video) {
+    throw new APIError(422, "Video does not exists");
+  }
+
+  const playlist = await Playlist.findByIdAndUpdate(
+    playlistID,
+    {
+      $pull: {
+        videos: videoID
+      }
+    },
+    { new: true }
+  )
+    .populate({
+      path: "owner",
+      select: "-password -refreshToken -watchHistory"
+    })
+    .populate("videos");
+
+  if (!playlist) {
+    throw new APIError(404, "Playlist not found");
+  }
+
   res
     .status(200)
     .json(
