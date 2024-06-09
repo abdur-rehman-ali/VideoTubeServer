@@ -3,6 +3,7 @@ import { authenticate } from "../middlewares/authenticate.middleware.js";
 import {
   addVideoToPlaylist,
   createPlaylist,
+  deletePlaylist,
   getAllPlaylistOfUserById,
   getSinglePlaylistById,
   removeVideoFromPlaylist
@@ -23,5 +24,8 @@ router
 router
   .route("/:playlistID/removeFromPlaylist")
   .post(upload.none(), authenticate, removeVideoFromPlaylist);
+router
+  .route("/:playlistID/deletePlaylist")
+  .delete(authenticate, deletePlaylist);
 
 export default router;

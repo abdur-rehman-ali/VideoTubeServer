@@ -169,3 +169,27 @@ export const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
       new APIResponse(200, playlist, "Video added to playlist successfully")
     );
 });
+
+export const deletePlaylist = asyncHandler(async (req, res) => {
+  const { playlistID } = req.params;
+
+  if (!playlistID) {
+    throw new APIError(400, "Playlist Id is required");
+  }
+
+  const playlist = await Playlist.findById(playlistID);
+
+  if (!playlist) {
+    throw new APIError(404, "Playlist not found");
+  }
+
+  if (!playlist.owner.equals(req.user._id)) {
+    throw new APIError(403, "You are not the owner of this playlist");
+  }
+
+  await Playlist.findByIdAndDelete(playlistID);
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Playlist deleted successfully"));
+});
