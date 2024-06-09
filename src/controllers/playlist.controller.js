@@ -43,10 +43,12 @@ export const getSinglePlaylistById = asyncHandler(async (req, res) => {
     throw new APIError(422, "Id is required");
   }
 
-  const playlist = await Playlist.findById(playlistID).populate({
-    path: "owner",
-    select: "-password -refreshToken -watchHistory"
-  });
+  const playlist = await Playlist.findById(playlistID)
+    .populate({
+      path: "owner",
+      select: "-password -refreshToken -watchHistory"
+    })
+    .populate("videos");
 
   if (!playlist) {
     throw new APIError(500, "Playlist not found");
@@ -64,10 +66,12 @@ export const getAllPlaylistOfUserById = asyncHandler(async (req, res) => {
     throw new APIError(422, "User Id is required");
   }
 
-  const allPlaylists = await Playlist.find({ owner: userID }).populate({
-    path: "owner",
-    select: "-password -refreshToken -watchHistory"
-  });
+  const allPlaylists = await Playlist.find({ owner: userID })
+    .populate({
+      path: "owner",
+      select: "-password -refreshToken -watchHistory"
+    })
+    .populate("videos");
 
   if (!userID) {
     throw new APIError(500, "Playlists not found");

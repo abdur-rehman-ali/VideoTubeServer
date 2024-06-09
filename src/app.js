@@ -15,6 +15,6 @@ app.get("/api/v1", (_, res) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/subscriptions", subscriptionRoutes);
 app.use("/api/v1/videos", videoRoutes);
-app.use("/api/v1/playlist", playlistRoutes);
+app.use("/api/v1/playlists", playlistRoutes);
 
 export default app;
