@@ -4,7 +4,8 @@ import {
   addVideoToPlaylist,
   createPlaylist,
   getAllPlaylistOfUserById,
-  getSinglePlaylistById
+  getSinglePlaylistById,
+  removeVideoFromPlaylist
 } from "../controllers/playlist.controller.js";
 import { upload } from "../utils/multer.js";
 
@@ -19,5 +20,8 @@ router.route("/create").post(upload.none(), authenticate, createPlaylist);
 router
   .route("/:playlistID/addToPlaylist")
   .post(upload.none(), authenticate, addVideoToPlaylist);
+router
+  .route("/:playlistID/removeFromPlaylist")
+  .post(upload.none(), authenticate, removeVideoFromPlaylist);
 
 export default router;
