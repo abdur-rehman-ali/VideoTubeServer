@@ -2,6 +2,7 @@ import { Playlist } from "../models/playlist.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Video } from "../models/video.model.js";
 
 export const createPlaylist = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
@@ -80,5 +81,44 @@ export const getAllPlaylistOfUserById = asyncHandler(async (req, res) => {
         allPlaylists,
         "Playlists of user fetched successfully"
       )
+    );
+});
+
+export const addVideoToPlaylist = asyncHandler(async (req, res) => {
+  const { playlistID } = req.params;
+  const { videoID } = req.body;
+
+  if (!playlistID) {
+    throw new APIError(422, "Playlist id is required");
+  }
+
+  if (!videoID) {
+    throw new APIError(422, "Video id is required");
+  }
+
+  const video = await Video.findById(videoID);
+  if (!video) {
+    throw new APIError(422, "Video does not exists");
+  }
+
+  const playlist = await Playlist.findByIdAndUpdate(
+    playlistID,
+    {
+      $addToSet: {
+        videos: videoID
+      }
+    },
+    { new: true }
+  )
+    .populate({
+      path: "owner",
+      select: "-password -refreshToken -watchHistory"
+    })
+    .populate("videos");
+
+  res
+    .status(200)
+    .json(
+      new APIResponse(200, playlist, "Video added to playlist successfully")
     );
 });

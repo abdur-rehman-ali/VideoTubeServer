@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/authenticate.middleware.js";
 import {
+  addVideoToPlaylist,
   createPlaylist,
   getAllPlaylistOfUserById,
   getSinglePlaylistById
@@ -15,5 +16,8 @@ router.route("/user/:userID").get(getAllPlaylistOfUserById);
 
 // Private routes
 router.route("/create").post(upload.none(), authenticate, createPlaylist);
+router
+  .route("/:playlistID/addToPlaylist")
+  .post(upload.none(), authenticate, addVideoToPlaylist);
 
 export default router;
