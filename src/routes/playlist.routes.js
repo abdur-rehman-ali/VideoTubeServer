@@ -4,6 +4,7 @@ import {
   addVideoToPlaylist,
   createPlaylist,
   deletePlaylist,
+  editPlaylist,
   getAllPlaylistOfUserById,
   getSinglePlaylistById,
   removeVideoFromPlaylist
@@ -27,5 +28,8 @@ router
 router
   .route("/:playlistID/deletePlaylist")
   .delete(authenticate, deletePlaylist);
+router
+  .route("/:playlistID/editPlaylist")
+  .put(upload.none(), authenticate, editPlaylist);
 
 export default router;
