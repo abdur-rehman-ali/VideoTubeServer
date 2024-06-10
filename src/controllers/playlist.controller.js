@@ -197,3 +197,21 @@ export const deletePlaylist = asyncHandler(async (req, res) => {
     .status(200)
     .json(new APIResponse(200, {}, "Playlist deleted successfully"));
 });
+
+export const editPlaylist = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+  const { playlistID } = req.params;
+
+  const playlist = await Playlist.findById(playlistID);
+  if (!playlist) {
+    throw new APIError(403, "Playlist not found");
+  }
+
+  if (title) playlist.title = title;
+  if (description) playlist.description = description;
+  await playlist.save();
+
+  res
+    .status(201)
+    .json(new APIResponse(200, playlist, "Playlist edit successfully"));
+});
