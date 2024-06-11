@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { APIError } from "../utils/APIError.js";
 
-export const authenticate = asyncHandler(async (req, res, next) => {
+export const authenticate = asyncHandler(async (req, _, next) => {
   let bearerToken = req.headers.authorization;
   if (!bearerToken) {
     throw new APIError(401, "Unauthorized access");
@@ -15,5 +15,12 @@ export const authenticate = asyncHandler(async (req, res, next) => {
     throw new APIError(401, "Invalid Token");
   }
   req.user = user;
+  next();
+});
+
+export const isUserAuthenticated = asyncHandler(async (req, _, next) => {
+  if (!req.user) {
+    throw new APIError(401, "User not authenticated");
+  }
   next();
 });
