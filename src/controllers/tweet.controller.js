@@ -90,3 +90,20 @@ export const deleteTweet = asyncHandler(async (req, res) => {
 
   res.status(200).json(new APIResponse(200, {}, "Tweet deleted successfully!"));
 });
+
+export const getCurrentUsersTweet = asyncHandler(async (req, res) => {
+  const tweets = await Tweet.find({ creator: req.user._id }).populate(
+    "creator",
+    "userName"
+  );
+
+  res
+    .status(200)
+    .json(
+      new APIResponse(
+        200,
+        tweets,
+        "Users tweets has been fetched successfully!"
+      )
+    );
+});
