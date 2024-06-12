@@ -7,6 +7,7 @@ import {
   createTweet,
   deleteTweet,
   editTweet,
+  getCurrentUsersTweet,
   tweets
 } from "../controllers/tweet.controller.js";
 import { upload } from "../utils/multer.js";
@@ -25,5 +26,8 @@ router
 router
   .route("/:tweetID/delete")
   .delete(authenticate, isUserAuthenticated, deleteTweet);
+router
+  .route("/currentUser")
+  .get(authenticate, isUserAuthenticated, getCurrentUsersTweet);
 
 export default router;
