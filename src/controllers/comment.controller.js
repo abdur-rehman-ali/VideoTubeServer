@@ -1,4 +1,5 @@
 import { Comment } from "../models/comment.model.js";
+import { Tweet } from "../models/tweet.model.js";
 import { Video } from "../models/video.model.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
@@ -31,5 +32,38 @@ export const createCommentOnVideo = asyncHandler(async (req, res) => {
     throw new APIError(500, "Failed to comment");
   }
 
-  res.status(201).json(new APIResponse(201, comment, "Commented on video"));
+  const commentWithOwner = await comment.populate("owner", "_id email userName")
+
+  res.status(201).json(new APIResponse(201, commentWithOwner, "Commented on video"));
+});
+
+export const createCommentOnTweet = asyncHandler(async (req, res) => {
+  const { content, tweetID } = req.body;
+
+  if (!content) {
+    throw new APIError(400, "Content is required");
+  }
+
+  if (!tweetID || !mongoose.Types.ObjectId.isValid(tweetID)) {
+    throw new APIError(400, "Invalid or missing tweetID");
+  }
+
+  const tweet = await Tweet.findById(tweetID);
+  if (!tweet) {
+    throw new APIError(404, "Tweet not found");
+  }
+
+  const comment = await Comment.create({
+    content: content,
+    tweet: tweetID,
+    owner: req.user._id
+  });
+
+  if (!comment) {
+    throw new APIError(500, "Failed to comment");
+  }
+
+  const commentWithOwner = await comment.populate("owner", "_id email userName")
+
+  res.status(201).json(new APIResponse(201, commentWithOwner, "Commented on tweet"));
 });
