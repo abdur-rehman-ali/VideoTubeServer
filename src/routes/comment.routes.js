@@ -5,7 +5,10 @@ import {
 } from "../middlewares/authenticate.middleware.js";
 
 import { upload } from "../utils/multer.js";
-import { createCommentOnVideo } from "../controllers/comment.controller.js";
+import {
+  createCommentOnTweet,
+  createCommentOnVideo
+} from "../controllers/comment.controller.js";
 
 const router = Router();
 
@@ -13,5 +16,8 @@ const router = Router();
 router
   .route("/commentOnVideo")
   .post(upload.none(), authenticate, isUserAuthenticated, createCommentOnVideo);
+router
+  .route("/commentOnTweet")
+  .post(upload.none(), authenticate, isUserAuthenticated, createCommentOnTweet);
 
 export default router;
