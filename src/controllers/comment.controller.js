@@ -32,9 +32,14 @@ export const createCommentOnVideo = asyncHandler(async (req, res) => {
     throw new APIError(500, "Failed to comment");
   }
 
-  const commentWithOwner = await comment.populate("owner", "_id email userName")
+  const commentWithOwner = await comment.populate(
+    "owner",
+    "_id email userName"
+  );
 
-  res.status(201).json(new APIResponse(201, commentWithOwner, "Commented on video"));
+  res
+    .status(201)
+    .json(new APIResponse(201, commentWithOwner, "Commented on video"));
 });
 
 export const createCommentOnTweet = asyncHandler(async (req, res) => {
@@ -63,7 +68,12 @@ export const createCommentOnTweet = asyncHandler(async (req, res) => {
     throw new APIError(500, "Failed to comment");
   }
 
-  const commentWithOwner = await comment.populate("owner", "_id email userName")
+  const commentWithOwner = await comment.populate(
+    "owner",
+    "_id email userName"
+  );
 
-  res.status(201).json(new APIResponse(201, commentWithOwner, "Commented on tweet"));
+  res
+    .status(201)
+    .json(new APIResponse(201, commentWithOwner, "Commented on tweet"));
 });
