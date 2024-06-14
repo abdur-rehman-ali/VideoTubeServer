@@ -7,7 +7,8 @@ import {
 import { upload } from "../utils/multer.js";
 import {
   createCommentOnTweet,
-  createCommentOnVideo
+  createCommentOnVideo,
+  editComment
 } from "../controllers/comment.controller.js";
 
 const router = Router();
@@ -19,5 +20,8 @@ router
 router
   .route("/commentOnTweet")
   .post(upload.none(), authenticate, isUserAuthenticated, createCommentOnTweet);
+router
+  .route("/:commentID/editComment")
+  .put(upload.none(), authenticate, isUserAuthenticated, editComment);
 
 export default router;
