@@ -77,3 +77,39 @@ export const createCommentOnTweet = asyncHandler(async (req, res) => {
     .status(201)
     .json(new APIResponse(201, commentWithOwner, "Commented on tweet"));
 });
+
+export const editComment = asyncHandler(async (req, res) => {
+  const { content } = req.body;
+  const { commentID } = req.params;
+
+  if (!content) {
+    throw new APIError(400, "Content is required");
+  }
+
+  if (!commentID || !mongoose.Types.ObjectId.isValid(commentID)) {
+    throw new APIError(400, "Invalid or missing commentID");
+  }
+
+  const comment = await Comment.findOneAndUpdate(
+    { _id: commentID, owner: req.user._id },
+    {
+      content: content
+    },
+    {
+      new: true
+    }
+  );
+
+  if (!comment) {
+    throw new APIError(404, "Comment not found");
+  }
+
+  const commentWithOwner = await comment.populate(
+    "owner",
+    "_id email userName"
+  );
+
+  res
+    .status(201)
+    .json(new APIResponse(201, commentWithOwner, "Comment edited"));
+});
