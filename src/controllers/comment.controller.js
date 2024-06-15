@@ -113,3 +113,27 @@ export const editComment = asyncHandler(async (req, res) => {
     .status(201)
     .json(new APIResponse(201, commentWithOwner, "Comment edited"));
 });
+
+export const deleteComment = asyncHandler(async (req, res) => {
+  const { commentID } = req.params;
+
+  if (!commentID || !mongoose.Types.ObjectId.isValid(commentID)) {
+    throw new APIError(400, "Invalid or missing commentID");
+  }
+
+  const comment = await Comment.findById(commentID);
+  if (!comment) {
+    throw new APIError(404, "Comment not found");
+  }
+
+  const isUserOwnerOfComment = comment.owner.equals(req.user.id);
+  if (!isUserOwnerOfComment) {
+    throw new APIError(403, "You are not authorized to delete this comment");
+  }
+
+  await comment.deleteOne();
+
+  res
+    .status(201)
+    .json(new APIResponse(201, {}, "Comment deleted"));
+});
