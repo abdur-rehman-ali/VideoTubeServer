@@ -133,7 +133,5 @@ export const deleteComment = asyncHandler(async (req, res) => {
 
   await comment.deleteOne();
 
-  res
-    .status(201)
-    .json(new APIResponse(201, {}, "Comment deleted"));
+  res.status(201).json(new APIResponse(201, {}, "Comment deleted"));
 });
