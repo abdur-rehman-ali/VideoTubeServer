@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares/authenticate.middleware.js";
+import {
+  authenticate,
+  isUserAuthenticated
+} from "../middlewares/authenticate.middleware.js";
 import {
   deleteVideo,
   getAllVideos,
@@ -25,13 +28,22 @@ router.route("/upload-video").post(
   ]),
   uploadVideo
 );
-router.route("/:videoId/update").put(authenticate, updateVideo);
+router
+  .route("/:videoId/update")
+  .put(authenticate, isUserAuthenticated, updateVideo);
 router
   .route("/:videoId/update/:resourceType")
-  .put(authenticate, upload.single("thumbnail"), updateVideo);
-router.route("/:videoId/destroy").delete(authenticate, deleteVideo);
+  .put(
+    upload.single("thumbnail"),
+    authenticate,
+    isUserAuthenticated,
+    updateVideo
+  );
+router
+  .route("/:videoId/destroy")
+  .delete(authenticate, isUserAuthenticated, deleteVideo);
 router
   .route("/:videoId/togglePublishVideo")
-  .put(authenticate, togglePublishVideo);
+  .put(authenticate, isUserAuthenticated, togglePublishVideo);
 
 export default router;
